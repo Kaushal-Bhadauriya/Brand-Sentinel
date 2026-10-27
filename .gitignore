@@ -1,0 +1,27 @@
+# Python / Backend
+.venv/
+__pycache__/
+*.pyc
+qdrant_storage/
+
+# Node / Frontend
+node_modules/
+frontend/.next/
+frontend/out/
+
+# Environment Secrets
+.env
+.env.local
+
+# Python Binaries & Heavy Virtual Environments
+.venv/
+venv/
+*.lib
+*.dll
+*.node
+qdrant_storage/
+
+# Node / Frontend Build files
+node_modules/
+frontend/.next/
+frontend/out/
