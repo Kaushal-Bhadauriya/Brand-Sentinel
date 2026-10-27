@@ -146,12 +146,3 @@ Open `http://localhost:3000`.
 - Add `NEXT_PUBLIC_API_URL` pointing at your Render service URL.
 
 Render's free tier spins services down when idle, so the first request after a quiet period can be slow.
-
-## Status
-
-Working: project scaffold, API client, editor, and findings panel.
-Still in progress: ingestion pipeline, hybrid retrieval, and the deterministic rule set.
-
-## License
-
-MIT (or whichever you pick; add a `LICENSE` file to match).
