@@ -2,6 +2,8 @@ import io
 import os
 import re
 import uuid
+import hashlib
+import math
 import logging
 from typing import List, Dict, Any, Optional, Tuple
 from pathlib import Path
@@ -66,6 +68,27 @@ DEFAULT_GUIDELINE_SEEDS: List[Dict[str, Any]] = [
 ]
 
 
+class LightweightEmbedding:
+    """Small deterministic feature-hashing embedder that avoids loading PyTorch."""
+
+    def __init__(self, dimensions: int):
+        self.dimensions = dimensions
+
+    def encode(self, text: str) -> List[float]:
+        vector = [0.0] * self.dimensions
+        tokens = re.findall(r"\w+", text.lower()) if text else []
+        for token in tokens:
+            digest = hashlib.sha256(token.encode("utf-8")).digest()
+            index = int.from_bytes(digest[:4], "big") % self.dimensions
+            sign = 1.0 if digest[4] & 1 else -1.0
+            vector[index] += sign
+
+        magnitude = math.sqrt(sum(value * value for value in vector))
+        if magnitude:
+            vector = [value / magnitude for value in vector]
+        return vector
+
+
 class HybridRAGEngine:
     """
     Production Hybrid RAG Engine combining:
@@ -83,15 +106,10 @@ class HybridRAGEngine:
         self._initialized = False
 
     def _get_embedding_model(self):
-        """Lazy load SentenceTransformer model singleton"""
+        """Return a lightweight, memory-safe embedding implementation."""
         if self._embedding_model is None:
-            try:
-                from sentence_transformers import SentenceTransformer
-                logger.info(f"Loading embedding model: {settings.EMBEDDING_MODEL_NAME}")
-                self._embedding_model = SentenceTransformer(settings.EMBEDDING_MODEL_NAME)
-            except Exception as e:
-                logger.error(f"Failed to load SentenceTransformer: {e}")
-                self._embedding_model = None
+            logger.info("Using lightweight feature-hashing embeddings (memory-safe mode).")
+            self._embedding_model = LightweightEmbedding(settings.EMBEDDING_DIMENSION)
         return self._embedding_model
 
     def _get_qdrant_client(self):
