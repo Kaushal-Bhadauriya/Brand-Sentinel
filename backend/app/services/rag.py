@@ -262,7 +262,7 @@ class HybridRAGEngine:
 
             vector = None
             if model:
-                vector = model.encode(composite_text).tolist()
+                vector = model.encode(composite_text)
             else:
                 # Fallback zero-vector if torch/embeddings not available
                 vector = [0.0] * settings.EMBEDDING_DIMENSION
@@ -390,7 +390,7 @@ class HybridRAGEngine:
         dense_results: List[Tuple[str, float]] = []
         if model:
             try:
-                query_vector = model.encode(query).tolist()
+                query_vector = model.encode(query)
                 search_hits = client.search(
                     collection_name=settings.QDRANT_COLLECTION,
                     query_vector=query_vector,
